@@ -100,7 +100,11 @@ function App() {
                 value.data?.subtitle ||
                 value.data?.title ? (
                   <div key={index}>
-                    <a style={styles.resultTitle} href={value.data.url}>
+                    <a
+                      style={styles.resultTitle}
+                      href={value.data.url}
+                      target="_blank"
+                    >
                       {value.data.title ?? value.data.url}
                     </a>
                     {value.data?.subtitle && (
