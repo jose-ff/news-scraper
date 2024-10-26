@@ -52,13 +52,29 @@ function registerIpcHandlers() {
         timeout: 30000,
       });
 
-      const paragraphs = await page.evaluate(() => {
+      const title = await page.evaluate(() => {
+        const element = document.querySelector("h1");
+        return element?.textContent;
+      });
+
+      const subtitle = await page.evaluate(() => {
+        const element = document.querySelector("h2");
+        return element?.textContent;
+      });
+
+      const firstP = await page.evaluate(() => {
         const elements = document.querySelectorAll("p");
-        return Array.from(elements).map((element) => element.textContent);
+        return Array.from(elements)
+          .map((element) => element.textContent)
+          .find((value) => (value?.split(" ").length ?? 0) > 9);
       });
 
       await browser.close();
-      return paragraphs;
+      return {
+        firstP: firstP ?? null,
+        title: title ?? null,
+        subtitle: subtitle ?? null,
+      };
     } catch (error) {
       console.error("Scraping error:", error);
       throw error;

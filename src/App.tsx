@@ -4,7 +4,11 @@ import * as React from "react";
 declare global {
   interface Window {
     electronAPI: {
-      scrapeWebsite: (url: string) => Promise<string[]>;
+      scrapeWebsite: (url: string) => Promise<{
+        firstP: string | null;
+        title: string | null;
+        subtitle: string | null;
+      }>;
     };
   }
 }
@@ -64,11 +68,6 @@ function App() {
     };
   };
 
-  console.log(
-    "BREAKPOINT",
-    results.map((value) => value.data)
-  );
-
   return (
     <div style={styles.root}>
       <h1>News Scraper</h1>
@@ -89,11 +88,21 @@ function App() {
         </div>
 
         <div>
-          <p>
-            {results.some((result) => result.isLoading)
-              ? "Loading..."
-              : "Results"}
-          </p>
+          {results.some((result) => result.isLoading)
+            ? "Loading..."
+            : results.map((value, index) =>
+                value.data?.firstP &&
+                value.data.subtitle &&
+                value.data.title ? (
+                  <div key={index}>
+                    <p>{value.data.title}</p>
+                    <p>{value.data.subtitle}</p>
+                    <p>{value.data.firstP}</p>
+                  </div>
+                ) : (
+                  <React.Fragment key={index} />
+                )
+              )}
         </div>
       </div>
     </div>
