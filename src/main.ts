@@ -36,13 +36,14 @@ const createWindow = () => {
 };
 
 function registerIpcHandlers() {
-  ipcMain.handle("scrape-website", async (event, url) => {
+  ipcMain.handle("scrape-website", async (_, url) => {
     try {
       const browser = await puppeteer.launch({
         executablePath: puppeteer.executablePath(),
       });
 
       const page = await browser.newPage();
+      await page.setJavaScriptEnabled(false);
       await page.setUserAgent(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       );
