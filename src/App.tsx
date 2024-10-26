@@ -1,3 +1,4 @@
+import { useQueries } from "@tanstack/react-query";
 import * as React from "react";
 
 declare global {
@@ -10,47 +11,63 @@ declare global {
 
 type StyleObject = Record<string, React.CSSProperties>;
 
-const scrape = async () => {
-  const data = await window.electronAPI.scrapeWebsite(
-    "https://www.bbc.com/mundo/noticias-america-latina-55698861"
-  );
-  console.log("BREAKPOINT answer", data);
+const scrapeWebsite = async (url: string) => {
+  try {
+    new URL(url);
+  } catch {
+    return null;
+  }
+
+  return window.electronAPI.scrapeWebsite(url);
 };
 
 function App() {
-  const [webSites, setWebSites] = React.useState([""]);
+  const [websites, setWebsites] = React.useState([""]);
 
-  const addWebSite = () => {
-    setWebSites((prev) => [...prev, ""]);
+  const results = useQueries({
+    queries: websites.map((website) => ({
+      queryKey: ["websites", website],
+      queryFn: () => scrapeWebsite(website),
+      staleTime: Infinity,
+    })),
+  });
+
+  const addWebsite = () => {
+    setWebsites((prev) => [...prev, ""]);
   };
 
-  const removeWebSite = (index: number) => {
+  const removeWebsite = (index: number) => {
     return () => {
-      if (webSites.length === 1) {
-        setWebSites((prev) => {
-          const newWebSites = [...prev];
-          newWebSites[0] = "";
-          return newWebSites;
+      if (websites.length === 1) {
+        setWebsites((prev) => {
+          const newWebsites = [...prev];
+          newWebsites[0] = "";
+          return newWebsites;
         });
         return;
       }
-      setWebSites((prev) => {
-        const newWebSites = [...prev];
-        newWebSites.splice(index, 1);
-        return newWebSites;
+      setWebsites((prev) => {
+        const newWebsites = [...prev];
+        newWebsites.splice(index, 1);
+        return newWebsites;
       });
     };
   };
 
-  const editWebSite = (index: number) => {
+  const editWebsite = (index: number) => {
     return (event: React.ChangeEvent<HTMLInputElement>) => {
-      setWebSites((prev) => {
-        const newWebSites = [...prev];
-        newWebSites[index] = event.target.value;
-        return newWebSites;
+      setWebsites((prev) => {
+        const newWebsites = [...prev];
+        newWebsites[index] = event.target.value;
+        return newWebsites;
       });
     };
   };
+
+  console.log(
+    "BREAKPOINT",
+    results.map((value) => value.data)
+  );
 
   return (
     <div style={styles.root}>
@@ -58,20 +75,26 @@ function App() {
 
       <div style={styles.grid}>
         <div style={styles.inputs}>
-          {webSites.map((value, index) => (
-            <div style={styles.inputContainer}>
-              <input key={index} value={value} onChange={editWebSite(index)} />
-              <button style={styles.button} onClick={removeWebSite(index)}>
+          {websites.map((value, index) => (
+            <div key={index} style={styles.inputContainer}>
+              <input value={value} onChange={editWebsite(index)} />
+              <button style={styles.button} onClick={removeWebsite(index)}>
                 -
               </button>
             </div>
           ))}
-          <button style={styles.button} onClick={addWebSite}>
+          <button style={styles.button} onClick={addWebsite}>
             +
           </button>
         </div>
 
-        <div>Result?</div>
+        <div>
+          <p>
+            {results.some((result) => result.isLoading)
+              ? "Loading..."
+              : "Results"}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -99,6 +122,9 @@ const styles = {
   },
   button: {
     width: "40px",
+  },
+  result: {
+    margin: 0,
   },
 } satisfies StyleObject;
 
