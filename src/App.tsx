@@ -28,6 +28,7 @@ const scrapeWebsite = async (url: string) => {
 
 function App() {
   const [websites, setWebsites] = React.useState([""]);
+  const textRef = React.useRef<HTMLDivElement>(null);
 
   const results = useQueries({
     queries: websites.map((website) => ({
@@ -69,6 +70,25 @@ function App() {
     };
   };
 
+  const handleCopy = async () => {
+    const htmlToCopy = textRef.current?.innerHTML;
+
+    if (!htmlToCopy) {
+      alert("Error copying the text");
+      return;
+    }
+
+    const blob = new Blob([htmlToCopy], { type: "text/html" });
+    const clipboardItem = new ClipboardItem({ "text/html": blob });
+
+    try {
+      await navigator.clipboard.write([clipboardItem]);
+      alert("Text copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy formatted text: ", err);
+    }
+  };
+
   return (
     <div style={styles.root}>
       <h1>News Scraper</h1>
@@ -92,32 +112,41 @@ function App() {
           </button>
         </div>
 
-        <div style={styles.result}>
-          {results.some((result) => result.isLoading)
-            ? "Loading..."
-            : results.map((value, index) =>
-                value.data?.firstP ||
-                value.data?.subtitle ||
-                value.data?.title ? (
-                  <div key={index}>
-                    <a
-                      style={styles.resultTitle}
-                      href={value.data.url}
-                      target="_blank"
-                    >
-                      {value.data.title ?? value.data.url}
-                    </a>
-                    {value.data?.subtitle && (
-                      <p style={styles.resultText}>{value.data.subtitle}</p>
-                    )}
-                    {value.data?.firstP && (
-                      <p style={styles.resultText}>{value.data.firstP}</p>
-                    )}
-                  </div>
-                ) : (
-                  <React.Fragment key={index} />
-                )
+        <div style={styles.resultContainer}>
+          {results.some((result) => result.isLoading) ? (
+            "Loading..."
+          ) : (
+            <>
+              {results.length && results[0].data?.url && (
+                <button onClick={handleCopy}>Copy text</button>
               )}
+              <div ref={textRef} style={styles.result}>
+                {results.map((value, index) =>
+                  value.data?.firstP ||
+                  value.data?.subtitle ||
+                  value.data?.title ? (
+                    <div key={index}>
+                      <a
+                        style={styles.resultTitle}
+                        href={value.data.url}
+                        target="_blank"
+                      >
+                        {value.data.title ?? value.data.url}
+                      </a>
+                      {value.data?.subtitle && (
+                        <p style={styles.resultText}>{value.data.subtitle}</p>
+                      )}
+                      {value.data?.firstP && (
+                        <p style={styles.resultText}>{value.data.firstP}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <React.Fragment key={index} />
+                  )
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -149,6 +178,11 @@ const styles = {
   },
   button: {
     width: "40px",
+  },
+  resultContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
   },
   result: {
     display: "flex",
