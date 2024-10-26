@@ -50,28 +50,44 @@ function registerIpcHandlers() {
         timeout: 30000,
       });
 
-      const title = await page.evaluate(() => {
-        const element = document.querySelector("h1");
-        return element?.textContent;
-      });
+      const h1Element = await page.$("h1");
+
+      const title = await page.evaluate((el) => el?.innerText, h1Element);
 
       const subtitle = await page.evaluate(() => {
         const element = document.querySelector("h2");
         return element?.textContent;
       });
 
-      const firstP = await page.evaluate(() => {
-        const elements = document.querySelectorAll("p");
-        return Array.from(elements)
-          .map((element) => element.textContent)
-          .find((value) => (value?.split(" ").length ?? 0) > 9);
-      });
+      const firstP = await page.evaluate((h1) => {
+        let element = h1?.parentElement;
+
+        const getText = (p: HTMLParagraphElement) =>
+          p.textContent?.trim().replace(/\s+/g, " ");
+
+        while (element) {
+          const ps = Array.from(element.querySelectorAll("p"));
+          const goodP = ps.find((p) => {
+            if ((getText(p)?.split(" ").length ?? 0) > 9) {
+              return true;
+            }
+            return false;
+          });
+
+          if (goodP) {
+            return getText(goodP);
+          }
+
+          element = element.parentElement;
+        }
+        return null;
+      }, h1Element);
 
       await browser.close();
       return {
-        firstP: firstP ?? null,
         title: title ?? null,
         subtitle: subtitle ?? null,
+        firstP: firstP ?? null,
         url,
       };
     } catch (error) {
