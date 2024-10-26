@@ -1,7 +1,26 @@
-import { useState } from "react";
+import * as React from "react";
+
+declare global {
+  interface Window {
+    electronAPI: {
+      scrapeWebsite: (url: string) => Promise<string[]>;
+    };
+  }
+}
+
+const scrape = async () => {
+  const data = await window.electronAPI.scrapeWebsite(
+    "https://www.bbc.com/mundo/noticias-america-latina-55698861"
+  );
+  console.log("BREAKPOINT answer", data);
+};
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    void scrape();
+  }, []);
 
   return (
     <>
