@@ -8,6 +8,7 @@ declare global {
         firstP: string | null;
         title: string | null;
         subtitle: string | null;
+        url: string;
       }>;
     };
   }
@@ -76,7 +77,11 @@ function App() {
         <div style={styles.inputs}>
           {websites.map((value, index) => (
             <div key={index} style={styles.inputContainer}>
-              <input value={value} onChange={editWebsite(index)} />
+              <input
+                value={value}
+                onChange={editWebsite(index)}
+                style={styles.input}
+              />
               <button style={styles.button} onClick={removeWebsite(index)}>
                 -
               </button>
@@ -87,17 +92,23 @@ function App() {
           </button>
         </div>
 
-        <div>
+        <div style={styles.result}>
           {results.some((result) => result.isLoading)
             ? "Loading..."
             : results.map((value, index) =>
-                value.data?.firstP &&
-                value.data.subtitle &&
-                value.data.title ? (
+                value.data?.firstP ||
+                value.data?.subtitle ||
+                value.data?.title ? (
                   <div key={index}>
-                    <p>{value.data.title}</p>
-                    <p>{value.data.subtitle}</p>
-                    <p>{value.data.firstP}</p>
+                    <a style={styles.resultTitle} href={value.data.url}>
+                      {value.data.title ?? value.data.url}
+                    </a>
+                    {value.data?.subtitle && (
+                      <p style={styles.resultText}>{value.data.subtitle}</p>
+                    )}
+                    {value.data?.firstP && (
+                      <p style={styles.resultText}>{value.data.firstP}</p>
+                    )}
                   </div>
                 ) : (
                   <React.Fragment key={index} />
@@ -122,17 +133,30 @@ const styles = {
   inputs: {
     display: "flex",
     flexDirection: "column",
-    gap: "2rem",
+    gap: "1.5rem",
   },
   inputContainer: {
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row",
     gap: "5px",
+  },
+  input: {
+    flex: 1,
   },
   button: {
     width: "40px",
   },
   result: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1.5rem",
+  },
+  resultTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    margin: 0,
+  },
+  resultText: {
     margin: 0,
   },
 } satisfies StyleObject;

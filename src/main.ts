@@ -75,6 +75,7 @@ function registerIpcHandlers() {
         firstP: firstP ?? null,
         title: title ?? null,
         subtitle: subtitle ?? null,
+        url,
       };
     } catch (error) {
       console.error("Scraping error:", error);
