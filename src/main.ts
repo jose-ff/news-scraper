@@ -1,12 +1,14 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import puppeteer from "puppeteer";
+// @ts-expect-error
+import started from "electron-squirrel-startup";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string | undefined;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require("electron-squirrel-startup")) {
+if (started) {
   app.quit();
 }
 
