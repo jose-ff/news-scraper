@@ -126,19 +126,14 @@ function App() {
                   value.data?.subtitle ||
                   value.data?.title ? (
                     <div key={index}>
-                      <a
-                        style={styles.resultTitle}
-                        href={value.data.url}
-                        target="_blank"
-                      >
-                        {value.data.title ?? value.data.url}
-                      </a>
+                      <p style={styles.resultTitle}>{value.data.title}</p>
                       {value.data?.subtitle && (
                         <p style={styles.resultText}>{value.data.subtitle}</p>
                       )}
                       {value.data?.firstP && (
                         <p style={styles.resultText}>{value.data.firstP}</p>
                       )}
+                      <a href={value.data.url}>{value.data.url}</a>
                     </div>
                   ) : (
                     <React.Fragment key={index} />
