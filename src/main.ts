@@ -67,17 +67,26 @@ function registerIpcHandlers() {
         const getText = (p: HTMLParagraphElement) =>
           p.textContent?.trim().replace(/\s+/g, " ");
 
-        while (element) {
-          const ps = Array.from(element.querySelectorAll("p"));
+        const findP = (element: Element | null | undefined) => {
+          const ps = Array.from(element?.querySelectorAll("p") ?? []);
           const goodP = ps.find((p) => {
             if ((getText(p)?.split(" ").length ?? 0) > 9) {
               return true;
             }
             return false;
           });
+          return goodP;
+        };
 
-          if (goodP) {
-            return getText(goodP);
+        while (element) {
+          const childP = findP(element);
+          if (childP) {
+            return getText(childP);
+          }
+
+          const siblingP = findP(element.nextElementSibling);
+          if (siblingP) {
+            return getText(siblingP);
           }
 
           element = element.parentElement;

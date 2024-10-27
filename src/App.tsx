@@ -26,9 +26,12 @@ const scrapeWebsite = async (url: string) => {
   return window.electronAPI.scrapeWebsite(url);
 };
 
+const getText = (text?: string | null) =>
+  text?.endsWith(".") ? text : `${text}.`;
+
 function App() {
   const [websites, setWebsites] = React.useState([""]);
-  const textRef = React.useRef<HTMLDivElement>(null);
+  const textRef = React.useRef<HTMLUListElement>(null);
 
   const results = useQueries({
     queries: websites.map((website) => ({
@@ -120,26 +123,28 @@ function App() {
               {results.length && results[0].data?.url && (
                 <button onClick={handleCopy}>Copy text</button>
               )}
-              <div ref={textRef} style={styles.result}>
+              <ul ref={textRef} style={styles.result}>
                 {results.map((value, index) =>
                   value.data?.firstP ||
                   value.data?.subtitle ||
                   value.data?.title ? (
-                    <div key={index}>
-                      <p style={styles.resultTitle}>{value.data.title}</p>
-                      {value.data?.subtitle && (
-                        <p style={styles.resultText}>{value.data.subtitle}</p>
-                      )}
-                      {value.data?.firstP && (
-                        <p style={styles.resultText}>{value.data.firstP}</p>
-                      )}
-                      <a href={value.data.url}>{value.data.url}</a>
-                    </div>
+                    <li key={index}>
+                      <p style={styles.resultText}>
+                        <span style={styles.resultTitle}>
+                          {getText(value.data?.title)}
+                        </span>
+                        {` ${getText(value.data.subtitle)} ${getText(
+                          value.data.firstP
+                        )}`}
+                        <br />
+                        <a href={value.data.url}>{value.data.url}</a>
+                      </p>
+                    </li>
                   ) : (
                     <React.Fragment key={index} />
                   )
                 )}
-              </div>
+              </ul>
             </>
           )}
         </div>
@@ -185,9 +190,7 @@ const styles = {
     gap: "1.5rem",
   },
   resultTitle: {
-    fontSize: 18,
     fontWeight: "bold",
-    margin: 0,
   },
   resultText: {
     margin: 0,
